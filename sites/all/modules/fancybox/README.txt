@@ -32,7 +32,7 @@ DEPENDENCIES
 ============
 
 - Image (in core)
-- Libraries API 7.x-2.0 or higher (http://drupal.org/project/libraries)
+- Libraries API (http://drupal.org/project/libraries)
 - jQuery Update 7.x-2.3 (http://drupal.org/project/jquery_update)
   with jQuery 1.7 or higher.
 - fancyBox jQuery Plugin 2.1.0+ (http://fancyapps.com/fancybox/#license)
@@ -83,11 +83,7 @@ with "(fancyBox)".
 Views integration
 -----------------
 
-This module has support for Views. You can create a gallery as you would
-normally, and then use the "fancyBox" formatter instead of the "image"
-formatter. When the fancyBox formatter is selected, the formatter settings will
-become available to you just as if you were managing the display of an image
-field.
+Integration with Views is working, but still under development.
 
 Plugin configuration
 --------------------

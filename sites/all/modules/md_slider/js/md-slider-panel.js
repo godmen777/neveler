@@ -128,6 +128,7 @@
             });
             $('.panel-settings-link').live('click', function() {
                 $("#slide-setting-dlg").data("tab", $(this).parent().parent()).dialog("open");
+				return false;
             });
             $('.random-transition').click(function() {
                 $('#navbar-content-transitions input').removeAttr("checked");

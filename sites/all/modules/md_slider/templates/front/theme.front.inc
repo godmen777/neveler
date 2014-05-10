@@ -131,24 +131,12 @@
     $variables['class'] = implode(' ', $class);
 
     # Generate layer link
-    if ($layer['type'] == 'text')
-      $variables['layer_content'] = "<div>{$layer['title']}</div>";
-    elseif ($layer['type'] == 'image')
-      $variables['layer_content'] = "<img src='{$layer['url']}' />";
-
     if (isset($layer['link']) && is_array($layer['link'])) {
       $link = $layer['link'];
-      if (strpos($link['value'], 'http') === FALSE) {
-        $url = url($link['value'], array('absolute' => TRUE));
-      }
-      else {
-        $url = $link['value'];
-      }
-
-      if ($layer['type'] == 'text')
-        $variables['layer_content'] = "<a title='{$link['title']}' href='{$url}'>{$layer['title']}</a>";
+      if (strpos($link['value'], 'http') === FALSE)
+        $variables["link"] = url($link['value'], array('absolute' => TRUE));
       else
-        $variables['layer_content'] = "<a title='{$link['title']}' href='{$url}'><img src='{$layer['url']}'/></a>";
+          $variables["link"] = $link['value'];
     }
   }
 

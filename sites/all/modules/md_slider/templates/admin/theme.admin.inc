@@ -58,8 +58,9 @@ function template_preprocess_admin_layers_render(&$variables)
             }
             continue;
         }
-
-        $data[] = "data-{$attr}='{$value}'";
+        if ($attr == "title")
+          $value = htmlentities($value, ENT_QUOTES);
+        $data[] = "data-{$attr}=\"{$value}\"";
     }
 
     $data[] = "data-{$attr}='{$value}'";

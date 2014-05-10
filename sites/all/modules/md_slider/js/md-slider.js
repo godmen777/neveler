@@ -24,7 +24,6 @@
         'flipInY',
         'foolishIn', //-
         'lightSpeedIn',
-        'puffIn', //-
         'rollIn',  
         'rotateIn', 
         'rotateInDownLeft', 
@@ -39,7 +38,6 @@
         'tinLeftIn',  //-
         'tinUpIn',  //-
         'tinDownIn', //-
-        'vanishIn' //-
     ];
     effectsOut = [
         'bombRightOut',  //-

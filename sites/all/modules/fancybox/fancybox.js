@@ -8,10 +8,6 @@
     attach: function(context, settings) {
       var selectors = ['.fancybox'];
 
-      if (typeof settings.fancybox === 'undefined') {
-        settings.fancybox = {};
-      }
-
       if (typeof settings.fancybox.options === 'undefined') {
         settings.fancybox.options = {};
       }
@@ -31,10 +27,12 @@
         selectors = selectors.concat(settings.fancybox.selectors);
       }
 
-      // Not needed because behaviors are reattached.
-      settings.fancybox.options.live = false;
+      $.each(selectors, function(i, sel) {
+        var pos = sel.indexOf(':'),
+            selector = pos <= 0 ? sel : sel.substring(0, pos);
 
-      $(selectors.join(',')).fancybox(settings.fancybox.options);
+        $(sel + ':not(#fancybox-thumbs ' + selector + ')', context).fancybox(settings.fancybox.options);
+      });
     }
   };
 })(jQuery);

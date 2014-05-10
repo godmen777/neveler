@@ -385,6 +385,7 @@ function md_slider_configure_form_submit($form, &$form_state) {
     $settings['generate_css_file'] = $custom['generate_css_file'];
     $settings["videobox"] = $custom["videobox"];
 
+    // Create new slider or update existed slider to database
     if ($custom['sls_id'] != -1) {
         $slider = MDSlider::get_by_id((int)$custom['sls_id']);
         $slider->title = $custom['sls_title'];
@@ -419,8 +420,14 @@ function md_slider_configure_form_submit($form, &$form_state) {
         update_image_style('md_slider_' . $slider->slid . '_bg', $settings['width'], $settings['height'], TRUE);
     }
 
-    if ($slider)
+    if ($slider) {
+        // Create css file if setting is required
+        $css_content = variable_get("md_slider_{$slider->slid}_css", FALSE);
+        if ($settings["generate_css_file"] && $css_content !== FALSE)
+            file_unmanaged_save_data($css_content, "public://md-slider-{$slider->machine_name}-layers.css", FILE_EXISTS_REPLACE);
+
         drupal_set_message(t("MDSlider: '{$slider->title}' has been {$action}"));
+    }
     else
         drupal_set_message(t("MDSlider: '{$custom['sls_title']}' has been {$action}"));
 }
@@ -534,10 +541,9 @@ function get_slide_background() {
         } else {
             $output = file_create_url($file->uri);
         }
-
-        print $output;
     }
 
+    print $output;
 }
 
 /**
@@ -624,7 +630,9 @@ function md_slider_edit_form_submit($form, &$form_state) {
                     $classes[] = ".md-layer-{$slider->slid}-{$index}-{$key}" . $css;
             }
 
+            // Generate css for hover link
             if (isset($layer['link']) && is_array($layer['link'])) {
+                $classes[] = ".md-layer-{$slider->slid}-{$index}-{$key} {z-index: {$layer["zindex"]}}";
                 $css = md_slider_generate_layer_link_css($layer['link']);
                 if ($css != '')
                     if ($layer['type'] != "text")
@@ -655,11 +663,9 @@ function md_slider_edit_form_submit($form, &$form_state) {
 
     # Generate css file
     $css_content = implode("\r\n", $classes);
+    variable_set("md_slider_{$slider->slid}_css", $css_content);
     if ($slider->settings["generate_css_file"])
         file_unmanaged_save_data($css_content, "public://md-slider-{$slider->machine_name}-layers.css", FILE_EXISTS_REPLACE);
-    else
-        variable_set("md_slider_{$slider->slid}_css", $css_content);
-
 
     drupal_set_message(t("MDSlider: '{$slider->title}' has been updated."));
 }

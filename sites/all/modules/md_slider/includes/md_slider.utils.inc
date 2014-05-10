@@ -95,7 +95,8 @@ function process_layer_style($layer) {
     }
 
     // Generate css for z-index of layers
-    $output[] = "z-index: {$layer->zindex};";
+    if (!isset($layer->link) || !is_array($layer->link))
+        $output[] = "z-index: {$layer->zindex};";
 
     if (isset($layer->opacity) && is_numeric($layer->opacity)) {
         $opacity = $layer->opacity / 100;
@@ -209,6 +210,8 @@ function process_layer_border_position($border_position) {
  * Generate css class for layer link
  */
 function md_slider_generate_layer_link_css($link) {
+    $output = array();
+
     if ($link['color'] != '') {
         if ($link['color'] == '0')
             $output[] = "color: #000 !important;\n";

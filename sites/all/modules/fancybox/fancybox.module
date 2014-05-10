@@ -1,30 +1,9 @@
 <?php
 
 /**
- * Provides the fancyBox jQuery plugin, a tool that offers a nice and elegant
- * way to add zooming functionality for images, html content and multi-media
- * on your webpages, and an extensive settings page for configuring fancyBox
- * settings and how fancyBox interacts with your Drupal website.
- *
- * Commercial websites must obtain at least a single domain license in order
- * to use the fancyBox plugin legally. (http://fancyapps.com/fancybox/#license).
- *
- * If you find this module useful and would like to donate towards further
- * development and maintenance, please consider donating to the module
- * maintainer(s):
- *  - Daniel Imhoff (d.o: dwieeb, email: dwieeb@gmail.com)
- *    http://www.danielimhoff.com/donations/
- *
- * == BEGIN LICENSE ==
- *
- * Licensed under:
- *  - Creative Commons Attribution-NonCommercial 3.0
- *    http://creativecommons.org/licenses/by-nc/3.0/
- *
- * == END LICENSE ==
- *
  * @file
- * .module file for Drupal fancyBox hooks and functions.
+ * Provides the fancyBox jQuery plugin for displaying images, HTML content and
+ * multimedia in an elegant box.
  */
 
 /**
@@ -275,7 +254,7 @@ function fancybox_field_formatter_settings_form($field, $instance, $view_mode, $
     '#default_value' => $settings['fancybox_gallery_custom'],
     '#states' => array(
       'visible' => array(
-        ':input[name$="[settings][fancybox_gallery]"]' => array('value' => 'custom'),
+        ':input[name$="[settings_edit_form][settings][fancybox_gallery]"]' => array('value' => 'custom'),
       ),
     ),
   );
@@ -293,23 +272,9 @@ function fancybox_field_formatter_settings_form($field, $instance, $view_mode, $
     '#default_value' => $settings['fancybox_caption_custom'],
     '#states' => array(
       'visible' => array(
-        ':input[name$="[settings][fancybox_caption]"]' => array('value' => 'custom'),
+        ':input[name$="[settings_edit_form][settings][fancybox_caption]"]' => array('value' => 'custom'),
       ),
     ),
-  );
-
-  $element['fancybox_caption_custom_tokens_container'] = array(
-    '#type' => 'container',
-    '#states' => array(
-      'visible' => array(
-        ':input[name$="[settings][fancybox_caption]"]' => array('value' => 'custom'),
-      ),
-    ),
-  );
-
-  $element['fancybox_caption_custom_tokens_container']['fancybox_caption_custom_tokens'] = array(
-    '#theme' => 'token_tree',
-    '#token_types' => array('node'),
   );
 
   return $element;
@@ -347,8 +312,11 @@ function fancybox_field_formatter_settings_summary($field, $instance, $view_mode
   $caption_options = fancybox_field_formatter_caption_options();
 
   $summary = t('Content image style: %style', array('%style' => isset($image_style_options[$settings['fancybox_image_style_content']]) ? $image_style_options[$settings['fancybox_image_style_content']] : t('Original image'))) . '<br />';
+
   $summary .= t('fancyBox image style: %style', array('%style' => isset($image_style_options[$settings['fancybox_image_style_fancybox']]) ? $image_style_options[$settings['fancybox_image_style_fancybox']] : t('Original image'))) . '<br />';
+
   $summary .= t('Grouping options: %option', array('%option' => $settings['fancybox_gallery'] != 'none' ? $grouping_options[$settings['fancybox_gallery']] : t('None'))) . '<br />';
+
   $summary .= t('Caption: %option', array('%option' => $settings['fancybox_caption'] != 'none' ? $caption_options[$settings['fancybox_caption']] : t('None')));
 
   return $summary;
@@ -431,7 +399,7 @@ function _fancybox_defaults() {
     // Module settings
     'settings' => array(
       'selectors' => '',
-      'deactivated_pages' => "admin*\r\nimg_assist*\r\nimce*\r\nnode/add*\r\nnode/*/edit",
+      'deactivated_pages' => "admin*\nimg_assist*\nimce*\nnode/add*\nnode/*/edit",
     ),
     // Options that are plugged directly into the fancyBox javascript.
     'options' => array(
@@ -573,7 +541,7 @@ function _fancybox_filter_settings($settings) {
 
   // Shouldn't set blank options. Doesn't work if you use the module 'out of
   // the box'.
-  $filtered_settings = _fancybox_array_diff_assoc_recursive($settings, $defaults);
+  $filtered_settings = _fancybox_array_diff_recursive($settings, $defaults);
 
   foreach (array('thumbs', 'media', 'buttons') as $helper) {
     if ($settings['helpers'][$helper . '_enabled'] && !isset($filtered_settings['helpers'][$helper])) {
@@ -584,17 +552,15 @@ function _fancybox_filter_settings($settings) {
 
   if (isset($filtered_settings['settings']['selectors'])) {
     $selectors = $filtered_settings['settings']['selectors'];
-    $filtered_settings['selectors'] = explode("\r\n", trim($selectors));
+    $filtered_settings['selectors'] = explode("\n", trim($selectors));
   }
 
   // We should only update settings that are explicitly overridden.
-  if (isset($filtered_settings['options'])) {
-    foreach ($filtered_settings['options'] as $name => $value) {
-      if (!isset($value) || $value === '') {
-        unset($filtered_settings['options'][$name]);
-      }
-    }
-  }
+  // foreach ($filtered_settings['options'] as $name => $value) {
+  //   if (empty($value)) {
+  //     unset($filtered_settings['options'][$name]);
+  //   }
+  // }
 
   unset($filtered_settings['settings']);
   return $filtered_settings;
@@ -611,7 +577,7 @@ function _fancybox_filter_settings($settings) {
  * @return array
  *   An array containing all the entries from array1 that are not in array2.
  */
-function _fancybox_array_diff_assoc_recursive($array1, $array2) {
+function _fancybox_array_diff_recursive($array1, $array2) {
   $return = array();
 
   if (empty($array1)) {
@@ -621,7 +587,7 @@ function _fancybox_array_diff_assoc_recursive($array1, $array2) {
   foreach ($array1 as $key => $value) {
     if (array_key_exists($key, $array2)) {
       if (is_array($value)) {
-        $recursive_diff = _fancybox_array_diff_assoc_recursive($value, $array2[$key]);
+        $recursive_diff = _fancybox_array_diff_recursive($value, $array2[$key]);
 
         if (sizeof($recursive_diff)) {
           $return[$key] = $recursive_diff;
@@ -652,10 +618,6 @@ function _fancybox_array_diff_assoc_recursive($array1, $array2) {
  * @see fancybox_admin_settings_form_submit().
  */
 function _fancybox_array_walk_convert_string(&$item, &$key) {
-  if (preg_match('/[0-9]+(px|ms)/', $item)) {
-    $item = substr($item, 0, -2);
-  }
-
   if (is_numeric($item)) {
     $f = (float) $item;
     $i = (int) $item;
